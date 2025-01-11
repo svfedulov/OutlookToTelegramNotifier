@@ -1,4 +1,4 @@
-# Outlook to Telegram notifier application
+# Outlook to Telegram notifier program
 
 The program is designed to monitor new messages in Microsoft Outlook and send notifications about them to Telegram. If you are unable or prefer not to connect directly to your mailbox, this solution ensures you stay informed at all times.
 
