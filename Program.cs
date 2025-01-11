@@ -1,81 +1,89 @@
 ﻿using CommandLine;
 using Microsoft.Office.Interop.Outlook;
 using System.Net.Http.Json;
+using System.Text;
 using Exception = System.Exception;
 using Timer = System.Timers.Timer;
 
-class Options
+namespace OutlookToTelegramNotifier
 {
-    [Option('t', "token", Required = true, HelpText = "Set Telegram bot token.")]
-    public required string Token { get; set; }
-
-    [Option('c', "chatId", Required = true, HelpText = "Set Telegram chat id.")]
-    public required string ChatId { get; set; }
-
-    [Option('i', "interval", Default = 5, Required = false, HelpText = "Set interval in minutes for checking messages.")]
-    public int Interval { get; set; }
-}
-
-class Program
-{
-    static void Main(string[] args)
+    class Program
     {
-        Parser.Default.ParseArguments<Options>(args)
-            .WithParsed<Options>(options =>
-            {
-                DateTime ago = DateTime.Now.AddMinutes(-options.Interval);
-
-                Timer timer = new Timer(options.Interval * 60 * 1000);
-                timer.Elapsed += async (sender, e) => {
-                    try
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed<Options>(options =>
+                {
+                    var timer = new Timer(options.Interval * 60 * 1000);                    
+                    timer.Elapsed += async (sender, e) => 
                     {
-                        Console.WriteLine($"{DateTime.Now.ToString()}: Checking messages...");
-
-                        Application? application = new Application();
-                        NameSpace? nameSpace = application.GetNamespace("MAPI");
-                        MAPIFolder? mAPIFolder = nameSpace.GetDefaultFolder(OlDefaultFolders.olFolderInbox);
-                        Items? items = mAPIFolder.Items.Restrict("[Unread]=true");
-
-                        foreach (MailItem mailItem in items.OfType<MailItem>())
+                        try
                         {
-                            if (mailItem.ReceivedTime >= ago)
+                            Console.WriteLine($"{DateTime.Now.ToString()}: Checking messages.");
+
+                            var nameSpace = (new Application()).GetNamespace("MAPI");
+
+                            var filter = $"[Unread]=true AND [ReceivedTime] >= '{DateTime.Now.AddMinutes(-options.Interval):ddddd h:nn AMPM}'";                            
+
+                            foreach (var mailItem in nameSpace.GetDefaultFolder(OlDefaultFolders.olFolderInbox).Items.Restrict(filter).OfType<MailItem>())
                             {
-                                var notification = $"New unread message from {mailItem.SenderEmailAddress} with subject {mailItem.Subject}.";
+                                var applicable = true;
 
-                                Console.WriteLine($"{DateTime.Now.ToString()}: {notification}");
-
-                                using (HttpClient client = new HttpClient())
+                                if (!string.IsNullOrEmpty(options.SenderNameFilter) && !mailItem.SenderName.Contains(options.SenderNameFilter))
                                 {
-                                    HttpResponseMessage response = await client.PostAsJsonAsync($"https://api.telegram.org/bot{options.Token}/sendMessage",
+                                    applicable = false;
+                                }
+
+                                if (!string.IsNullOrEmpty(options.SenderEmailAddressFilter) && !mailItem.SenderEmailAddress.Contains(options.SenderEmailAddressFilter))
+                                {
+                                    applicable = false;
+                                }
+
+                                if (!string.IsNullOrEmpty(options.SubjectFilter) && !mailItem.Subject.Contains(options.SubjectFilter))
+                                {
+                                    applicable = false;
+                                }
+
+                                if (options.ImportantOnly && mailItem.Importance != OlImportance.olImportanceHigh)
+                                {
+                                    applicable = false;
+                                }
+
+                                if (applicable)
+                                {
+                                    using var client = new HttpClient();
+                                    var response = await client.PostAsJsonAsync($"https://api.telegram.org/bot{options.Token}/sendMessage",
                                         new
                                         {
                                             chat_id = options.ChatId,
-                                            text = notification
+                                            text = $"Unread message from \"{mailItem.SenderEmailAddress}\" with subject \"{mailItem.Subject}\"."
                                         });
 
                                     Console.WriteLine($"{DateTime.Now.ToString()}: {(response.IsSuccessStatusCode ? "Message sent to Telegram successfully." : "Failed to send message to Telegram.")}");
                                 }
+
+                                if (options.MarkRead)
+                                {
+                                    mailItem.UnRead = false;
+                                }
                             }
+
+                            nameSpace.Logoff();
+                            nameSpace = null;
                         }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"{DateTime.Now.ToString()}: Error: {ex.Message}");
+                        }
+                    };
+                    timer.AutoReset = true;
+                    timer.Enabled = true;
 
-                        nameSpace.Logoff();
-
-                        items = null;
-                        mAPIFolder = null;
-                        nameSpace = null;
-                        application = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"{DateTime.Now.ToString()}: Error: {ex.Message}");
-                    }
-                };
-                timer.AutoReset = true;
-                timer.Enabled = true;
-
-                Console.WriteLine($"{DateTime.Now.ToString()}: Service started. Press Enter to exit.");
-                Console.ReadLine();
-                Console.WriteLine($"{DateTime.Now.ToString()}: Service stopped.");
-            });
+                    Console.WriteLine($"{DateTime.Now.ToString()}: Service started. Press Enter to exit.");
+                    Console.ReadLine();
+                    Console.WriteLine($"{DateTime.Now.ToString()}: Service stopped.");
+                });
+        }
     }
 }
