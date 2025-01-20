@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Web;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -54,7 +55,7 @@ namespace OutlookToTelegramNotifier
                                 new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, ""));
 
                             if (
-                                mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
+                                //mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
                                 !string.IsNullOrEmpty(options.SenderNameFilter) && !mailItem.SenderName.Contains(options.SenderNameFilter) ||
                                 !string.IsNullOrEmpty(options.SenderEmailAddressFilter) && !mailItem.SenderEmailAddress.Contains(options.SenderEmailAddressFilter) ||
                                 !string.IsNullOrEmpty(options.SubjectFilter) && !mailItem.Subject.Contains(options.SubjectFilter) ||
@@ -96,7 +97,7 @@ namespace OutlookToTelegramNotifier
                                         var message = await telegramBotClient.SendDocument(options.ChatId,
                                             document: InputFile.FromStream(stream, $"{mailItem.EntryID}.pdf"),
                                             caption: $"<b>New unread message</b>\n<b>SenderName</b>: {mailItem.SenderName}\n<b>SenderEmailAddress:</b> {mailItem.SenderEmailAddress}\n" +
-                                            $"<b>Subject:</b> {mailItem.Subject}\n<b>Importance:</b> {new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, "")}",
+                                            $"<b>Subject:</b> {HttpUtility.HtmlEncode(mailItem.Subject)}\n<b>Importance:</b> {new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, "")}",
                                             parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
                                         logger.LogDebug("Sent message with id: {Id} to Username: {Username}.", message.Id, message.Chat.Username);
@@ -114,7 +115,7 @@ namespace OutlookToTelegramNotifier
 
                                     var message = await telegramBotClient.SendMessage(options.ChatId, 
                                         $"<b>New unread message</b>\n<b>SenderName:</b> {mailItem.SenderName}\n<b>SenderEmailAddress:</b> {mailItem.SenderEmailAddress}\n" +
-                                        $"<b>Subject:</b> {mailItem.Subject}\n<b>Importance:</b> {new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, "")}",
+                                        $"<b>Subject:</b> {HttpUtility.HtmlEncode(mailItem.Subject)}\n<b>Importance:</b> {new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, "")}",
                                         parseMode: Telegram.Bot.Types.Enums.ParseMode.Html);
 
                                     logger.LogDebug("Sent message with id: {Id} to Username: {Username}.", message.Id, message.Chat.Username);
