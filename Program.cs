@@ -55,7 +55,7 @@ namespace OutlookToTelegramNotifier
                                 new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, ""));
 
                             if (
-                                //mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
+                                mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
                                 !string.IsNullOrEmpty(options.SenderNameFilter) && !mailItem.SenderName.Contains(options.SenderNameFilter) ||
                                 !string.IsNullOrEmpty(options.SenderEmailAddressFilter) && !mailItem.SenderEmailAddress.Contains(options.SenderEmailAddressFilter) ||
                                 !string.IsNullOrEmpty(options.SubjectFilter) && !mailItem.Subject.Contains(options.SubjectFilter) ||
