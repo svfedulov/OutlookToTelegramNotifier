@@ -1,8 +1,7 @@
 {
   "profiles": {
     "OutlookToTelegramNotifier": {
-      "commandName": "Project",
-      "commandLineArgs": "-t 7133160227:AAGuFVVdqtYfMUUNg9uaqgHfcs5URs47Qgs -c 137117360 -i 1 -m -d"
+      "commandName": "Project"
     }
   }
 }
