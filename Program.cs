@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Office.Interop.Outlook;
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Telegram.Bot;
@@ -33,8 +32,7 @@ namespace OutlookToTelegramNotifier
 
                 ILogger<Program> logger = loggerFactory.CreateLogger<Program>();
 
-                //var timer = new Timer(options.Interval * 60 * 1000);                    
-                var timer = new System.Timers.Timer(30 * 1000);                    
+                var timer = new System.Timers.Timer(options.Interval * 60 * 1000);                
                 timer.Elapsed += async (sender, e) => 
                 {
                     try
@@ -56,7 +54,7 @@ namespace OutlookToTelegramNotifier
                                 new Dictionary<int, string>() { { 0, "Low" }, { 1, "Normal" }, { 2, "High" } }.GetValueOrDefault((int)mailItem.Importance, ""));
 
                             if (
-                                //mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
+                                mailItem.ReceivedTime < DateTime.Now.AddMinutes(-options.Interval) ||
                                 !string.IsNullOrEmpty(options.SenderNameFilter) && !mailItem.SenderName.Contains(options.SenderNameFilter) ||
                                 !string.IsNullOrEmpty(options.SenderEmailAddressFilter) && !mailItem.SenderEmailAddress.Contains(options.SenderEmailAddressFilter) ||
                                 !string.IsNullOrEmpty(options.SubjectFilter) && !mailItem.Subject.Contains(options.SubjectFilter) ||
@@ -162,11 +160,14 @@ namespace OutlookToTelegramNotifier
                 timer.AutoReset = true;
                 timer.Enabled = true;
 
-                logger.LogInformation("{ProductName}", Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductName);
-                logger.LogInformation("{ProductVersion}", Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion);
-                logger.LogInformation("{LegalCopyright}", Process.GetCurrentProcess().MainModule?.FileVersionInfo.LegalCopyright);
+                Console.WriteLine($"{Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductName} {Process.GetCurrentProcess().MainModule?.FileVersionInfo.ProductVersion}");
+                Console.WriteLine(Process.GetCurrentProcess().MainModule?.FileVersionInfo.LegalCopyright);
+                Console.WriteLine();
+
                 logger.LogInformation("Program started. Press Enter to exit.");
+                
                 Console.ReadLine();
+                
                 logger.LogInformation("Program stopped.");                    
             });
         }
