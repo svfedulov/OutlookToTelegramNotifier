@@ -2,7 +2,7 @@
 
 namespace OutlookToTelegramNotifier
 {
-    class Options
+    class CommandLineOptions
     {
         [Option('t', "token", Required = true, HelpText = "Set Telegram bot token.")]
         public required string Token { get; set; }
@@ -25,10 +25,13 @@ namespace OutlookToTelegramNotifier
         [Option("important-only", Required = false, HelpText = "Set flag to process only messages marked as important.")]
         public bool ImportantOnly { get; set; }
 
-        [Option("mark-read", Required = false, HelpText = "Set flag to mark messages as read.")]
+        [Option('m', "mark-read", Required = false, HelpText = "Set flag to mark messages as read.")]
         public bool MarkRead { get; set; }
 
-        [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
-        public bool Verbose { get; set; }
+        [Option('a', "attach-as-pdf", Required = false, HelpText = "Set flag to send messages as PDF attachments.")]
+        public bool AttachAsPDF { get; set; }
+
+        [Option('d', "debug", Required = false, HelpText = "Set output to debug mode.")]
+        public bool Debug { get; set; }
     }
 }

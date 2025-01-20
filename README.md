@@ -6,7 +6,16 @@ The program is designed to check new messages in Microsoft Outlook and send noti
 
 ## Getting started
 
+## To-do list
+
+- Get rid of "OutlookToTelegramNotifier.Program[0]" in console.
+
 ## Change log
+
+### 1.0.2.0
+
+- Added: Added and implemented debug mode (instead of verbose mode).
+- Added: Added flag to send messages as PDF attachments.
 
 ### 1.0.1.0
 
