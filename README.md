@@ -4,25 +4,12 @@ The program is designed to monitor new messages in Microsoft Outlook and send no
 
 ## Features
 
-- Unread email detection in the Microsoft Outlook Inbox folder.
-
-The program connects not to the mail server but directly to the mail client installed on the workstation. This architecture has both advantages and disadvantages:
-
-Advantages:
-	Corporate mail servers often impose restrictions on direct connections (e.g., network, client, etc.). In this case, you connect from a corporate device, often using a VPN connection and a standard mail client.
-	There is no need to enter authentication credentials into a third-party application.
-
-Disadvantages:
-	The program operates only on Microsoft Windows and requires Microsoft Outlook to be installed.
-	The device must remain powered on and connected to the mail server.
-
+- Unread email detection in the Microsoft Outlook Inbox folder. The program connects not to the mail server but directly to the mail client installed on the workstation. This architecture has both advantages (corporate mail servers often impose restrictions on direct connections; in this case, you connect from a corporate device, often using a VPN connection and a standard mail client; there is no need to enter authentication credentials into a third-party application) and disadvantages (the program operates only on Microsoft Windows and requires Microsoft Outlook to be installed; the device must remain powered on and connected to the mail server).
 - Notification delivery to Telegram messenger.
 - Configurable message check Intervals.
 - Message filtering options: filter by sender name, email address, subject, or message importance.
 - Mark messages as read.
-- Send messages as PDF attachments to Telegram.
-
-Initially, attachments were sent in MSG format, but it turned out that the mobile version of Microsoft Outlook does not support this format, which is standard for the desktop client.
+- Send messages as PDF attachments to Telegram. Initially, attachments were sent in MSG format, but it turned out that the mobile version of Microsoft Outlook does not support this format, which is standard for the desktop client.
 
 ## Getting started
 
